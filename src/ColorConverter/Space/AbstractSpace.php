@@ -23,43 +23,51 @@
  * THE SOFTWARE.
  */
 
-namespace Color;
+namespace ColorConverter\Space;
 
-abstract class Space
+use BadMethodCallException;
+use DomainException;
+
+abstract class AbstractSpace implements SpaceInterface
 {
-	public static function getSpaceBoundaries()
-	{
-		throw new \BadMethodCallException("not implemented");
-	}
+    /**
+     * @param mixed ...$values
+     *
+     * @return ColorConverter\Color
+     */
+    public static function getColor(...$values)
+    {
+        if (static::class == self::class) {
+            throw new BadMethodCallException("you are calling an abstraction");
+        }
 
-	public static function getLabels()
-	{
-		throw new \BadMethodCallException("not implemented");
-	}
+        return new \ColorConverter\Color(static::class, ...$values);
+    }
 
-	public static function validate(array $values)
-	{
-		throw new \BadMethodCallException("not implemented");
-	}
+    /**
+     * @param  array  $values
+     *
+     * @return boolean
+     */
+    public static function validate(array $values)
+    {
+        $boundaries = static::getSpaceBoundaries();
+        $length = max(array_map('count', $boundaries));
 
-	protected static function interpolateArgs($num, $args)
-	{
-		$values = $num == 1 && is_array($args[0]) ? $args[0] : $args;
+        if (count($values) < $length) {
+            return false;
+        }
 
-		if (!static::validate(array_values($values)))
-			throw new \DomainException("invalid " . get_called_class() . " color values: " . implode(',', $values));
+        for ($i=0; $i<$length; $i++) {
+            if ($values[$i] < $boundaries[0][$i]) {
+                return false;
+            }
 
-		return $values;
-	}
+            if ($values[$i] > $boundaries[1][$i]) {
+                return false;
+            }
+        }
 
-	public static function getColor()
-	{
-		if (__CLASS__ == $class = get_called_class())
-			throw new \DomainException("cannot create a colorspace from $class");
-
-		$values = static::interpolateArgs(func_num_args(), func_get_args());
-		$space  = substr($class, strrpos($class, '\\') +1); // strip namespace
-
-		return new Color($space, $values);
-	}
+        return true;
+    }
 }

@@ -1,0 +1,17 @@
+{
+    "name": "bdelespierre/color-converter",
+    "description": "Color spaces converter for PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Benjamin Delespierre",
+            "email": "benjamin.delespierre@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-0": { "ColorConverter": "src/" }
+    }
+}
